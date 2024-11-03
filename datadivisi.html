@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Divisi - Sistem Informasi Manajemen Karyawan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .card-info {
+            border-left: 5px solid #0d6efd;
+        }
+        .card .card-body .stat-icon {
+            font-size: 2rem;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand ms-3">Abstract.co</span>
+    </div>
+</nav>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="bg-primary text-white p-3" style="width: 250px; min-height: 100vh;">
+        <div class="text-center mb-4">
+            <img src="deng2.jpeg" alt="Admin Profile" class="profile-image mb-2">
+            <h5 class="text-white">Dinar Ahgil Misman</h5>
+            <p class="text-light">Administrator</p>
+        </div>
+        
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="index.html">
+                    <i class="bi bi-house-door me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="datakaryawan.html">
+                    <i class="bi bi-person-circle me-2"></i> Data Karyawan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="datajabatan.html">
+                    <i class="bi bi-briefcase me-2"></i> Data Jabatan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="datadivisi.html">
+                    <i class="bi bi-diagram-3 me-2"></i> Data Divisi
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Konten Utama -->
+    <div class="container mt-4">
+        <h2>Data Divisi</h2>
+
+        <!-- Form Tambah/Edit Divisi -->
+        <div class="card my-4">
+            <div class="card-header">Tambah/Edit Divisi</div>
+            <div class="card-body">
+                <form id="divisiForm">
+                    <div class="mb-3">
+                        <label for="divisiNama" class="form-label">Nama Divisi</label>
+                        <input type="text" class="form-control" id="divisiNama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="divisiDeskripsi" class="form-label">Deskripsi Divisi</label>
+                        <input type="text" class="form-control" id="divisiDeskripsi" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Batal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabel Data Divisi -->
+        <table class="table table-bordered" id="divisiTable">
+            <thead>
+                <tr>
+                    <th>Nama Divisi</th>
+                    <th>Deskripsi Divisi</th>
+                    <th>Jumlah Karyawan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Inisialisasi data divisi dari localStorage atau array kosong jika belum ada data
+    let divisiData = JSON.parse(localStorage.getItem('divisiData')) || [];
+    let editIndex = null;
+
+    // Fungsi untuk merender tabel data divisi
+    function renderTable() {
+        const tbody = document.querySelector("#divisiTable tbody");
+        tbody.innerHTML = "";  // Kosongkan tabel
+        divisiData.forEach((divisi, index) => {
+            const row = `
+                <tr>
+                    <td>${divisi.nama}</td>
+                    <td>${divisi.deskripsi}</td>
+                    <td>${divisi.jumlahKaryawan || 0}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editDivisi(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDivisi(${index})">Hapus</button>
+                    </td>
+                </tr>`;
+            tbody.innerHTML += row;
+        });
+        // Simpan data ke localStorage setelah perubahan
+        localStorage.setItem('divisiData', JSON.stringify(divisiData));
+        updateTotalDivisi();
+    }
+
+    function updateTotalDivisi() {
+        localStorage.setItem('totalDivisi', divisiData.length);
+    }
+
+    // Fungsi untuk mengisi form dengan data divisi yang ingin diedit
+    function editDivisi(index) {
+        const divisi = divisiData[index];
+        document.getElementById("divisiNama").value = divisi.nama;
+        document.getElementById("divisiDeskripsi").value = divisi.deskripsi;
+        editIndex = index;  // Simpan indeks data yang sedang diedit
+    }
+
+    // Fungsi untuk menghapus data divisi
+    function deleteDivisi(index) {
+        divisiData.splice(index, 1);  // Hapus data pada indeks yang dipilih
+        renderTable();
+    }
+
+    // Fungsi untuk mereset form
+    function resetForm() {
+        document.getElementById("divisiForm").reset();
+        editIndex = null;
+    }
+
+    // Fungsi untuk menambah divisi ke localStorage
+    function addDivisi(divisi) {
+        let totalDivisi = parseInt(localStorage.getItem('totalDivisi')) || 0;
+        totalDivisi += 1; // Tambah 1 divisi baru
+        localStorage.setItem('totalDivisi', totalDivisi);
+    }
+
+    // Event listener untuk form submit
+    document.getElementById("divisiForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const nama = document.getElementById("divisiNama").value;
+        const deskripsi = document.getElementById("divisiDeskripsi").value;
+
+        if (editIndex !== null) {
+            // Jika sedang mengedit, update data pada indeks yang dipilih
+            divisiData[editIndex] = { nama, deskripsi, jumlahKaryawan: divisiData[editIndex]?.jumlahKaryawan || 0 };
+        } else {
+            // Jika menambah data baru, push data ke array
+            divisiData.push({ nama, deskripsi, jumlahKaryawan: 0 }); // Jumlah karyawan diinisialisasi sebagai 0
+            addDivisi(nama); // Panggil fungsi untuk menambah divisi
+        }
+
+        renderTable();  // Render ulang tabel
+        resetForm();    // Reset form setelah submit
+    });
+
+    // Render tabel saat halaman pertama kali dimuat
+    renderTable();
+</script>
+</body>
+</html>
